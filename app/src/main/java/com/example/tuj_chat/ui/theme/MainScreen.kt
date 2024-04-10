@@ -32,12 +32,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.example.tuj_chat.R
-import com.example.tuj_chat.data.FirebaseManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
-fun MainScreen(onLogout: () -> Unit, onClickPersonalScreen: () -> Unit, onClickClubs: () -> Unit ){
+fun MainScreen(onLogout: () -> Unit,
+               onClickChatForum: () -> Unit,
+               onClickPersonalScreen: () -> Unit
+) {
     var isTUPortalOpened by remember { mutableStateOf(false) }
     var loggedInUser by remember { mutableStateOf<FirebaseUser?>(null) }
 
@@ -94,7 +96,10 @@ fun MainScreen(onLogout: () -> Unit, onClickPersonalScreen: () -> Unit, onClickC
             )
 
             SectionButton(text = "School Announcement", onClick = {}, backgroundColor = Color(0xA1001747))
-            SectionButton(text = "Forum", onClick = {}, backgroundColor = Color(0xA1001747))
+            SectionButton(text = "Forum", onClick = {
+                println("Forum")
+                onClickChatForum()
+            }, backgroundColor = Color(0xA1001747))
             SectionButton(
                 text = "Personal Chat",
                 onClick = {
@@ -105,11 +110,6 @@ fun MainScreen(onLogout: () -> Unit, onClickPersonalScreen: () -> Unit, onClickC
             SectionButton(
                 text = "TU Portal",
                 onClick = { isTUPortalOpened = true },
-                backgroundColor = Color(0xA1001747)
-            )
-            SectionButton(
-                text = "Clubs",
-                onClick = { onClickClubs()},
                 backgroundColor = Color(0xA1001747)
             )
 

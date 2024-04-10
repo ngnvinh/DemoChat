@@ -24,9 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
-import com.blc.darkchat.data.Messages
+import com.blc.darkchat.data.MessageGroup
 import com.example.tuj_chat.data.FirebaseManager
-import com.example.tuj_chat.data.User
 import com.example.tuj_chat.ui.theme.components.ChatAppBar
 import com.example.tuj_chat.ui.theme.components.MessageBox
 import com.example.tuj_chat.ui.theme.components.MessageInputField
@@ -34,15 +33,15 @@ import com.google.firebase.auth.FirebaseAuth
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen(user: User?, receiverId: String, onClickBack: () -> Unit) {
+fun ChatGroupScreen(onClickBack: () -> Unit) {
     val chatManager = FirebaseManager()
     val topBarState = rememberTopAppBarState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(topBarState)
-    val (messages, setMessages) = remember { mutableStateOf<List<Messages>>(emptyList()) }
+    val (messages, setMessages) = remember { mutableStateOf<List<MessageGroup>>(emptyList()) }
 
-    LaunchedEffect(FirebaseAuth.getInstance().uid) {
-        chatManager.receiveMessages(FirebaseAuth.getInstance().uid!!) { receivedMessages ->
-            setMessages(receivedMessages.reversed())
+    LaunchedEffect(Unit) {
+        chatManager.receivedMessages {
+            setMessages(it.reversed())
         }
     }
 
@@ -55,7 +54,7 @@ fun ChatScreen(user: User?, receiverId: String, onClickBack: () -> Unit) {
             .exclude(WindowInsets.navigationBars)
             .exclude(WindowInsets.ime),
         topBar = {
-            ChatAppBar(user!!){
+            ChatAppBar("Community"){
                 onClickBack()
             }
         },
@@ -79,12 +78,13 @@ fun ChatScreen(user: User?, receiverId: String, onClickBack: () -> Unit) {
             }
 
             MessageInputField(onMessageSent = { content ->
-                val message = Messages(
+                val message = MessageGroup(
                     senderId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                    receiverId = receiverId,
-                    content = content
+                    contentMessage = content,
+                    emailSender = FirebaseAuth.getInstance().currentUser?.email ?: "",
+                    timeStamp = System.currentTimeMillis()
                 )
-                chatManager.sendMessage(message, user)
+                chatManager.sendMessageGroup(message)
             })
         }
     }

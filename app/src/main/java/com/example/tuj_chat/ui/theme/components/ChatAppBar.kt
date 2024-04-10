@@ -29,7 +29,24 @@ import com.example.tuj_chat.data.User
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatAppBar(user: User, onClickBack: () -> Unit) {
+fun<T> ChatAppBar(user: T, onClickBack: () -> Unit) {
+    when(user){
+        is User -> {
+            ChatUserApp(user = user) {
+                onClickBack()
+            }
+        }
+        is String ->{
+            ChatCommunityApp(title = user) {
+                onClickBack()
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatUserApp(user: User, onClickBack: () -> Unit){
     CenterAlignedTopAppBar(
         title = {
             Column(
@@ -38,6 +55,70 @@ fun ChatAppBar(user: User, onClickBack: () -> Unit) {
             ) {
                 Text(
                     text = user.email,
+                    style = TextStyle(
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.sen)),
+                    )
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "Online",
+                    style = TextStyle(
+                        color = Color.White,
+                        fontSize = 14.sp,
+                        fontFamily = FontFamily(Font(R.font.sen)),
+                    )
+                )
+            }
+        },
+        modifier = Modifier
+            .clip(
+                RoundedCornerShape(
+                    bottomStart = 30.dp,
+                    bottomEnd = 30.dp
+                )
+            ),
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = Color(0xFF1F1F1F)
+        ),
+        navigationIcon = {
+            IconButton(onClick = {
+                onClickBack()
+            }) {
+                Icon(
+                    imageVector = Icons.Outlined.KeyboardArrowLeft,
+                    contentDescription = null,
+                    tint = Color.White
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = {  }) {
+                Icon(
+                    imageVector = Icons.Outlined.Call,
+                    contentDescription = null,
+                    tint = Color(0xFF007EF4)
+                )
+            }
+        },
+        scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ChatCommunityApp(title: String, onClickBack: () -> Unit){
+    CenterAlignedTopAppBar(
+        title = {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = title,
                     style = TextStyle(
                         color = Color.White,
                         fontSize = 16.sp,

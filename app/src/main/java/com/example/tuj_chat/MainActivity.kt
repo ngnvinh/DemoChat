@@ -23,9 +23,9 @@ import com.example.tuj_chat.data.FirebaseManager
 import com.example.tuj_chat.data.User
 import com.example.tuj_chat.ui.theme.screens.CallScreen
 import com.example.tuj_chat.ui.theme.screens.CameraScreen
+import com.example.tuj_chat.ui.theme.screens.ChatGroupScreen
 import com.example.tuj_chat.ui.theme.screens.ChatScreen
 import com.example.tuj_chat.ui.theme.screens.SearchScreen
-import com.example.tuj_chat.ui.theme.screens.ClubsScreen
 
 class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -53,14 +53,9 @@ class MainActivity : ComponentActivity() {
 
         when {
 
-            currentScreen == Screen.ClubsScreen -> {
-                ClubsScreen()
-
-            }
-
             currentScreen == Screen.ChatScreen -> {
                 user?.let {
-                    ChatScreen(it, it!!.id) {
+                    ChatScreen(it,  it.id  ) {
                         setCurrentScreen(Screen.PersonalChatScreen)
                     }
                 }
@@ -85,14 +80,26 @@ class MainActivity : ComponentActivity() {
                         setCurrentScreen(Screen.Main)
                     })
             }
+            currentScreen == Screen.ChatForum -> {
+                println("ChatForum")
+                ChatGroupScreen {
+                    setCurrentScreen(Screen.Main)
+                }
+            }
 
             currentUser != null -> {
+                println("Auth = ${currentUser.uid}")
+
                 // User is authenticated, show MainScreen
                 MainScreen(
                     onLogout = { setCurrentScreen(Screen.Login) },
-                    onClickPersonalScreen = { setCurrentScreen(Screen.PersonalChatScreen) },
-                    onClickClubs = { setCurrentScreen(Screen.ClubsScreen)} // Add a dummy lambda function for onClickClubs
-                )
+                    onClickChatForum = {
+                        println("chat forum")
+                        setCurrentScreen(Screen.ChatForum)
+                    }
+                ) {
+                    setCurrentScreen(Screen.PersonalChatScreen)
+                }
             }
 
             currentScreen == Screen.Login -> {
@@ -110,8 +117,11 @@ class MainActivity : ComponentActivity() {
                 )
             }
 
+
+
             else -> {
                 // Show login screen by default
+                auth.signOut()
                 LoginScreen(
                     navigateToRegistration = { setCurrentScreen(Screen.Registration) },
                     onLoginSuccess = { setCurrentScreen(Screen.Main) }
@@ -127,8 +137,9 @@ class MainActivity : ComponentActivity() {
         PersonalChatScreen,
         SearchScreen,
         ChatScreen,
-        ClubsScreen
+        ChatForum
     }
 }
+
 
 

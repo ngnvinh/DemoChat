@@ -1,18 +1,17 @@
 package com.example.tuj_chat.data
 
 import com.blc.darkchat.data.ConversationMapper
+import com.blc.darkchat.data.MessageGroup
 import com.blc.darkchat.data.Messages
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 class FirebaseManager {
     private val database = FirebaseDatabase.getInstance()
     private val usersRef = database.getReference("users")
     private val messagesRef = database.getReference("messages")
+    private val messagesGroupRef = database.getReference("messages_group")
     private val conversationsRef = database.getReference("conversations")
-    private val clubsRef = database.getReference("clubs")
 
     fun searchUsers(keyword: String, onResult: (List<User>) -> Unit) {
         usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -20,13 +19,13 @@ class FirebaseManager {
                 val users = mutableListOf<User>()
                 snapshot.children.forEach { dataSnapshot ->
                     val user = dataSnapshot.getValue(User::class.java)
-                    if (user != null && user.email.contains(keyword, ignoreCase = true) && user.email != FirebaseAuth.getInstance().currentUser?.email!!) {
+                    if (user != null && user.email.contains(keyword, ignoreCase = true)
+                        && user.email != FirebaseAuth.getInstance().currentUser?.email!!) {
                         users.add(user)
                     }
                 }
                 onResult(users)
             }
-
             override fun onCancelled(error: DatabaseError) {
                 // Handle database error
             }
@@ -37,16 +36,6 @@ class FirebaseManager {
         val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
         val user = User(userId, email, avatar)
         usersRef.child(userId).setValue(user)
-    }
-
-    fun addClub(title: String, description: String, leader: String, imageURL: String) {
-        val club = Clubs(title, leader, description, imageURL)
-
-        // Assuming you have a reference to your Firebase database
-        val clubsRef = FirebaseDatabase.getInstance().getReference("clubs")
-
-        // Set the club object under the generated clubId
-        clubsRef.child(title).setValue(club)
     }
 
     fun sendMessage(message: Messages, user: User?) {
@@ -61,6 +50,32 @@ class FirebaseManager {
             ConversationMapper(user!!.copy(email = FirebaseAuth.getInstance().currentUser?.email!!,
                 id = message.senderId), message.copy(receiverId = message.senderId))
         )
+    }
+    fun sendMessageGroup(message: MessageGroup) {
+        val messageId = System.currentTimeMillis();
+        messagesGroupRef.child("$messageId").setValue(message)
+    }
+
+    fun receivedMessages(onReceive: (List<MessageGroup>) -> Unit){
+        messagesGroupRef.addValueEventListener(object : ValueEventListener{
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists() && snapshot.hasChildren()){
+                    val listMessageGroup = mutableListOf<MessageGroup>()
+                    snapshot.children.forEach {
+                        val messageGroup = it.getValue(MessageGroup::class.java)
+                        messageGroup?.let {mGroup ->
+                            listMessageGroup.add(mGroup)
+                        }
+                    }
+                    onReceive(listMessageGroup)
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+        })
     }
 
     fun receiveConversations( id: String,onReceive: (List<ConversationMapper>) -> Unit) {
@@ -91,7 +106,8 @@ class FirebaseManager {
                 val messages = mutableListOf<Messages>()
                 snapshot.children.forEach { dataSnapshot ->
                     val message = dataSnapshot.getValue(Messages::class.java)
-                    if (message != null && (message.senderId == receiverId )) {
+                    if (message != null && (message.senderId == receiverId || message.receiverId == receiverId)) {
+                        println("senderId = ${message.senderId} - receiverId = ${message.receiverId} - $receiverId ")
                         messages.add(message)
                     }
                 }
@@ -103,27 +119,4 @@ class FirebaseManager {
             }
         })
     }
-    suspend fun fetchClubs(): List<Clubs> = suspendCoroutine { continuation ->
-        clubsRef.addListenerForSingleValueEvent(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val clubsList = mutableListOf<Clubs>()
-
-                for (snapshot in dataSnapshot.children) {
-                    val title = snapshot.child("title").getValue(String::class.java) ?: ""
-                    val leader = snapshot.child("leader").getValue(String::class.java) ?: ""
-                    val description = snapshot.child("description").getValue(String::class.java) ?: ""
-                    val imageUrl = snapshot.child("imageUrl").getValue(String::class.java) ?: ""
-
-                    val club = Clubs(title, description, leader, imageUrl)
-                    clubsList.add(club)
-                }
-
-                continuation.resume(clubsList)
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                // Handle error
-                continuation.resume(emptyList()) // Return empty list in case of error
-            }
-        })
-}}
+}

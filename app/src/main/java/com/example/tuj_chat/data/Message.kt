@@ -13,3 +13,10 @@ data class Messages(
     val timestamp: Long = System.currentTimeMillis()
 )
 
+data class  MessageGroup(
+    val senderId: String = "",
+    val emailSender: String = "",
+    val imageSender : String = "",
+    val contentMessage : String = "",
+    val timeStamp: Long = System.currentTimeMillis()
+)
