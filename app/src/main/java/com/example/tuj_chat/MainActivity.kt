@@ -26,6 +26,8 @@ import com.example.tuj_chat.ui.theme.screens.CameraScreen
 import com.example.tuj_chat.ui.theme.screens.ChatGroupScreen
 import com.example.tuj_chat.ui.theme.screens.ChatScreen
 import com.example.tuj_chat.ui.theme.screens.SearchScreen
+import com.example.tuj_chat.ui.theme.screens.ClubsScreen
+
 
 class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -52,6 +54,10 @@ class MainActivity : ComponentActivity() {
         val (currentScreen, setCurrentScreen) = remember { mutableStateOf(Screen.Login) }
 
         when {
+            currentScreen == Screen.ClubsScreen -> {
+                ClubsScreen()
+
+            }
 
             currentScreen == Screen.ChatScreen -> {
                 user?.let {
@@ -96,10 +102,10 @@ class MainActivity : ComponentActivity() {
                     onClickChatForum = {
                         println("chat forum")
                         setCurrentScreen(Screen.ChatForum)
-                    }
-                ) {
-                    setCurrentScreen(Screen.PersonalChatScreen)
-                }
+                    },
+                    onClickPersonalScreen = { setCurrentScreen(Screen.PersonalChatScreen) },
+                    onClickClubs = { setCurrentScreen(Screen.ClubsScreen)}
+                )
             }
 
             currentScreen == Screen.Login -> {
@@ -137,7 +143,8 @@ class MainActivity : ComponentActivity() {
         PersonalChatScreen,
         SearchScreen,
         ChatScreen,
-        ChatForum
+        ChatForum,
+        ClubsScreen
     }
 }
 

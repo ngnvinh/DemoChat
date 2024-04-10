@@ -5,6 +5,8 @@ import com.blc.darkchat.data.MessageGroup
 import com.blc.darkchat.data.Messages
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 class FirebaseManager {
     private val database = FirebaseDatabase.getInstance()
@@ -12,6 +14,7 @@ class FirebaseManager {
     private val messagesRef = database.getReference("messages")
     private val messagesGroupRef = database.getReference("messages_group")
     private val conversationsRef = database.getReference("conversations")
+    private val clubsRef = database.getReference("clubs")
 
     fun searchUsers(keyword: String, onResult: (List<User>) -> Unit) {
         usersRef.addListenerForSingleValueEvent(object : ValueEventListener {
@@ -119,4 +122,29 @@ class FirebaseManager {
             }
         })
     }
+    suspend fun fetchClubs(): List<Clubs> = suspendCoroutine { continuation ->
+        clubsRef.addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                val clubsList = mutableListOf<Clubs>()
+
+                for (snapshot in dataSnapshot.children) {
+                    val title = snapshot.child("title").getValue(String::class.java) ?: ""
+                    val leader = snapshot.child("leader").getValue(String::class.java) ?: ""
+                    val description = snapshot.child("description").getValue(String::class.java) ?: ""
+                    val imageUrl = snapshot.child("imageUrl").getValue(String::class.java) ?: ""
+
+                    val club = Clubs(title, description, leader, imageUrl)
+                    clubsList.add(club)
+                }
+
+                continuation.resume(clubsList)
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                // Handle error
+                continuation.resume(emptyList()) // Return empty list in case of error
+            }
+        })
+    }
 }
+

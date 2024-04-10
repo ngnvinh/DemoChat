@@ -38,7 +38,8 @@ import com.google.firebase.auth.FirebaseUser
 @Composable
 fun MainScreen(onLogout: () -> Unit,
                onClickChatForum: () -> Unit,
-               onClickPersonalScreen: () -> Unit
+               onClickPersonalScreen: () -> Unit,
+               onClickClubs: () -> Unit
 ) {
     var isTUPortalOpened by remember { mutableStateOf(false) }
     var loggedInUser by remember { mutableStateOf<FirebaseUser?>(null) }
@@ -110,6 +111,11 @@ fun MainScreen(onLogout: () -> Unit,
             SectionButton(
                 text = "TU Portal",
                 onClick = { isTUPortalOpened = true },
+                backgroundColor = Color(0xA1001747)
+            )
+            SectionButton(
+                text = "Clubs",
+                onClick = { onClickClubs()},
                 backgroundColor = Color(0xA1001747)
             )
 
