@@ -25,6 +25,7 @@ import com.example.tuj_chat.ui.theme.screens.CallScreen
 import com.example.tuj_chat.ui.theme.screens.CameraScreen
 import com.example.tuj_chat.ui.theme.screens.ChatScreen
 import com.example.tuj_chat.ui.theme.screens.SearchScreen
+import com.example.tuj_chat.ui.theme.screens.ClubsScreen
 
 class MainActivity : ComponentActivity() {
     private lateinit var auth: FirebaseAuth
@@ -51,6 +52,11 @@ class MainActivity : ComponentActivity() {
         val (currentScreen, setCurrentScreen) = remember { mutableStateOf(Screen.Login) }
 
         when {
+
+            currentScreen == Screen.ClubsScreen -> {
+                ClubsScreen()
+
+            }
 
             currentScreen == Screen.ChatScreen -> {
                 user?.let {
@@ -82,9 +88,11 @@ class MainActivity : ComponentActivity() {
 
             currentUser != null -> {
                 // User is authenticated, show MainScreen
-                MainScreen(onLogout = { setCurrentScreen(Screen.Login) }) {
-                    setCurrentScreen(Screen.PersonalChatScreen)
-                }
+                MainScreen(
+                    onLogout = { setCurrentScreen(Screen.Login) },
+                    onClickPersonalScreen = { setCurrentScreen(Screen.PersonalChatScreen) },
+                    onClickClubs = { setCurrentScreen(Screen.ClubsScreen)} // Add a dummy lambda function for onClickClubs
+                )
             }
 
             currentScreen == Screen.Login -> {
@@ -118,9 +126,9 @@ class MainActivity : ComponentActivity() {
         Main,
         PersonalChatScreen,
         SearchScreen,
-        ChatScreen
+        ChatScreen,
+        ClubsScreen
     }
 }
-
 
 

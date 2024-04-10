@@ -32,11 +32,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import com.example.tuj_chat.R
+import com.example.tuj_chat.data.FirebaseManager
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 
 @Composable
-fun MainScreen(onLogout: () -> Unit, onClickPersonalScreen: () -> Unit) {
+fun MainScreen(onLogout: () -> Unit, onClickPersonalScreen: () -> Unit, onClickClubs: () -> Unit ){
     var isTUPortalOpened by remember { mutableStateOf(false) }
     var loggedInUser by remember { mutableStateOf<FirebaseUser?>(null) }
 
@@ -104,6 +105,11 @@ fun MainScreen(onLogout: () -> Unit, onClickPersonalScreen: () -> Unit) {
             SectionButton(
                 text = "TU Portal",
                 onClick = { isTUPortalOpened = true },
+                backgroundColor = Color(0xA1001747)
+            )
+            SectionButton(
+                text = "Clubs",
+                onClick = { onClickClubs()},
                 backgroundColor = Color(0xA1001747)
             )
 
