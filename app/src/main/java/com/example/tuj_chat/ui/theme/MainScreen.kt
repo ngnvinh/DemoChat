@@ -42,6 +42,7 @@ fun MainScreen(onLogout: () -> Unit,
                onClickClubs: () -> Unit
 ) {
     var isTUPortalOpened by remember { mutableStateOf(false) }
+    var isTUNewsOpened by remember { mutableStateOf(false) }
     var loggedInUser by remember { mutableStateOf<FirebaseUser?>(null) }
 
     // Check if the user is logged in when the MainScreen is first composed
@@ -96,7 +97,7 @@ fun MainScreen(onLogout: () -> Unit,
                 contentScale = ContentScale.FillWidth
             )
 
-            SectionButton(text = "School Announcement", onClick = {}, backgroundColor = Color(0xA1001747))
+            SectionButton(text = "School Announcement", onClick = { isTUNewsOpened = true }, backgroundColor = Color(0xA1001747))
             SectionButton(text = "Forum", onClick = {
                 println("Forum")
                 onClickChatForum()
@@ -144,7 +145,22 @@ fun TUPortalWebView(
     }
 }
 
-
+@Composable
+fun TUNews(
+    isOpen: Boolean,
+    onClose: () -> Unit
+) {
+    if (isOpen) {
+        Dialog(
+            onDismissRequest = onClose,
+            content = {
+                Box(Modifier.fillMaxSize()) {
+                    TUNewsContent()
+                }
+            }
+        )
+    }
+}
 
 @Composable
 private fun TUPortalWebViewContent() {
@@ -155,6 +171,20 @@ private fun TUPortalWebViewContent() {
                 settings.javaScriptEnabled = true
                 webViewClient = WebViewClient()
                 loadUrl("https://tuportal6.temple.edu/group/home/student-tools")
+            }
+        }
+    )
+}
+
+@Composable
+private fun TUNewsContent() {
+    AndroidView(
+        modifier = Modifier.fillMaxSize(),
+        factory = { context ->
+            WebView(context).apply {
+                settings.javaScriptEnabled = true
+                webViewClient = WebViewClient()
+                loadUrl("https://en-news.tuj.ac.jp")
             }
         }
     )
