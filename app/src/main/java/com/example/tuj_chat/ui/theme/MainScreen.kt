@@ -122,6 +122,7 @@ fun MainScreen(onLogout: () -> Unit,
 
             // TU Portal WebView
             TUPortalWebView(isOpen = isTUPortalOpened, onClose = { isTUPortalOpened = false })
+            TUNews(isOpen = isTUNewsOpened, onClose = { isTUNewsOpened = false })
         }
     }
 }
